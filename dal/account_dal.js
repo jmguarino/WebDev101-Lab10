@@ -96,3 +96,49 @@ exports.Insert = function(account_info, callback) {
     );
 }
 
+/*  View to return addresses associated with a user account.
+See AddAddress for information on creating the lookup table.
+
+CREATE OR REPLACE VIEW AccountAddressView AS
+SELECT a.account_id, ad.street, ad.city, ad.state_abbr, ad.zip FROM account a
+JOIN account_address aa ON a.account_id = aa.account_id
+JOIN address ad ON ad.address_id = aa.address_id;
+*/
+exports.GetAddress = function(account_id, callback){
+    console.log(account_id);
+
+    var query = 'SELECT * FROM AccountAddressView WHERE account_id = ' + account_id;
+
+    connection.query(query, function(err, result){
+        callback(err, result);
+    })
+}
+
+
+/* To create the User Account and Address lookup table run the following SQL.  Note the ON DELETE CASCADES.
+ Depending on your table schemas you may need to change table and column names.
+
+ drop table if exists account_address;
+ create table account_address (address_id int,
+ account_id int,
+ primary key(account_id, address_id),
+ foreign key (account_id) references account(account_id) ON DELETE CASCADE,
+ foreign key (address_id) references address(address_id) ON DELETE CASCADE);
+ */
+
+exports.AddAddress = function(info, callback) {
+    console.log(info);
+
+    var query_data = [info.account_id, info.address_id];
+    console.log(query_data);
+
+    var query = 'INSERT INTO account_address (account_id, address_id) VALUES (?, ?)';
+    console.log(query);
+
+    connection.query(query, query_data, function(err, result){
+        callback(err, result);
+    });
+
+}
+
+

@@ -3,6 +3,23 @@ var router = express.Router();
 var companyDal = require('../dal/company_dal');
 var addressDal = require('../dal/address_dal')
 
+
+/* return a table of all the companies and their addresses */
+router.get('/', function(req, res){
+     companyDal.GetAll(function(err, result){
+         console.log(result);
+         res.render('company/company_list', {rs: result});
+     });
+})
+
+
+router.get('/create', function(req, res) {
+    addressDal.GetAll(function(err, result) {
+        res.render('company/company_create', {address : result});
+    });
+});
+
+
 /* return a drop down of all the address */
 router.get('/edit', function(req, res) {
     var company_id = req.query.company_id;
@@ -31,6 +48,19 @@ router.get('/edit', function(req, res) {
     });
 
 });
+
+router.get('/save', function(req, res) {
+    console.log(req.query);
+
+    companyDal.Insert(req.query, function(err, result) {
+        if(err) {
+            res.send('Error adding new company.<br />' + err);
+        }
+        else {
+            res.send('Company Successfully Added');
+        }
+    });
+})
 
 
 router.get('/update', function(req, res, next) {
@@ -65,6 +95,14 @@ router.get('/update', function(req, res, next) {
             }
         });
     })
+});
+
+router.get('/delete', function(req, res) {
+    console.log(req.query.company_id);
+
+    companyDal.Delete(req.query.company_id, function(err, result) {
+       res.send(req.query.name + ' was successfully deleted.');
+    });
 });
 
 module.exports = router;
